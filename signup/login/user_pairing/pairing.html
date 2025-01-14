@@ -8,25 +8,31 @@
 </head>
 <body>
     <header>
-        <h1>Welcome to the Pairing Page</h1>
-        <button onclick="window.location.href='pairing_requests.html'">🔔</button> <!-- Bell icon for pairing requests -->
+        <h1>Pairing Page</h1>
+        <button onclick="window.location.href='pairing_requests.html'">🔔 Requests</button>
     </header>
 
-    <section>
-        <input type="text" id="searchUsername" placeholder="Search for username">
-        <button id="searchButton">Search</button>
-    </section>
+    <main>
+        <section id="myIdSection">
+            <h2>Your Unique ID</h2>
+            <p id="userId">Loading...</p>
+            <button id="copyIdButton">Copy ID</button>
+        </section>
 
-    <section id="searchResults">
-        <!-- Search results will be displayed here -->
-    </section>
+        <section id="searchSection">
+            <h2>Send a Pairing Request</h2>
+            <input type="text" id="searchIdInput" placeholder="Enter ID to pair">
+            <button id="sendRequestButton">Send Request</button>
+        </section>
+    </main>
 
     <!-- Firebase SDK Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <!-- For Modular Firebase SDK (v9+) -->
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js"></script>
 
-    <!-- Custom JS Script -->
-    <script src="pairing.js"></script>
+    <!-- Custom JavaScript -->
+    <script type="module" src="pairing.js"></script>
 </body>
 </html>

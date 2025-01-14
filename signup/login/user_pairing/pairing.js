@@ -1,7 +1,7 @@
-// Initialize Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+// Import Firebase SDK modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -13,102 +13,104 @@ const firebaseConfig = {
     appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
     measurementId: "G-J844DFXM0W"
 };
-import { setLogLevel } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-setLogLevel("debug");
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// Function to search for users by username
-function searchUser() {
-    const searchQuery = document.getElementById("searchUsername").value.trim();
-    console.log("Search query:", searchQuery);  // Debugging the search query
+// Load the user's unique ID
+function loadUserId() {
+    const currentUser = auth.currentUser;
+    const userIdElement = document.getElementById("userId");
 
-    if (searchQuery) {
+    if (currentUser) {
+        const userRef = ref(db, 'users/' + currentUser.uid);
+        get(userRef)
+            .then(snapshot => {
+                const userData = snapshot.val();
+                if (userData && userData.code) {
+                    userIdElement.textContent = userData.code;
+                } else {
+                    userIdElement.textContent = "No ID found.";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching user ID:", error.message);
+                userIdElement.textContent = "Error loading ID.";
+            });
+    } else {
+        userIdElement.textContent = "User not logged in.";
+    }
+}
+
+// Copy the user's unique ID to the clipboard
+function copyUserId() {
+    const userId = document.getElementById("userId").textContent;
+    if (userId && userId !== "Loading..." && userId !== "No ID found.") {
+        navigator.clipboard.writeText(userId).then(() => {
+            alert("ID copied to clipboard!");
+        });
+    } else {
+        alert("No ID available to copy.");
+    }
+}
+
+// Send a pairing request to the entered ID
+function sendPairingRequest() {
+    const enteredId = document.getElementById("searchIdInput").value.trim();
+    const currentUser = auth.currentUser;
+
+    if (!enteredId) {
+        alert("Please enter an ID.");
+        return;
+    }
+
+    if (currentUser) {
         const usersRef = ref(db, 'users/');
         get(usersRef)
-            .then((snapshot) => {
+            .then(snapshot => {
                 const users = snapshot.val();
-                console.log("Users retrieved from Firebase:", users);  // Debugging the retrieved users
+                let targetUser = null;
 
-                const results = [];
-
+                // Find the user with the entered ID
                 for (const userId in users) {
-                    if (users[userId].username.toLowerCase().includes(searchQuery.toLowerCase())) {
-                        results.push({ userId, username: users[userId].username });
+                    if (users[userId].code === enteredId) {
+                        targetUser = { id: userId, ...users[userId] };
+                        break;
                     }
                 }
 
-                console.log("Search results:", results);  // Debugging the results
-
-                displaySearchResults(results);
-            })
-            .catch((error) => {
-                console.error("Error searching users:", error.message);
-            });
-    } else {
-        console.log("Search query is empty.");  // If no query is entered
-    }
-}
-
-// Function to display search results
-function displaySearchResults(results) {
-    const searchResultsDiv = document.getElementById("searchResults");
-    searchResultsDiv.innerHTML = '';  // Clear previous results
-
-    if (results.length > 0) {
-        results.forEach(result => {
-            const resultDiv = document.createElement('div');
-            resultDiv.classList.add('search-result');
-            resultDiv.innerHTML = `
-                <p>Username: ${result.username}</p>
-                <button onclick="sendPairingRequest('${result.userId}')">Send Pairing Request</button>
-            `;
-            searchResultsDiv.appendChild(resultDiv);
-        });
-    } else {
-        searchResultsDiv.innerHTML = '<p>No users found.</p>';
-    }
-}
-
-// Function to send pairing request
-function sendPairingRequest(targetUserId) {
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-        const userRef = ref(db, 'users/' + currentUser.uid);
-        const targetUserRef = ref(db, 'users/' + targetUserId);
-
-        // Add target user to the current user's pairing requests
-        get(userRef)
-            .then((snapshot) => {
-                const currentUserData = snapshot.val();
-                const pairingRequests = currentUserData.pairingRequests || [];
-
-                if (!pairingRequests.includes(targetUserId)) {
-                    pairingRequests.push(targetUserId);
-                    // Update current user pairing requests
-                    set(userRef, { ...currentUserData, pairingRequests });
-
-                    // Add current user to the target user's pairing requests
-                    get(targetUserRef)
-                        .then((snapshot) => {
-                            const targetUserData = snapshot.val();
-                            const targetPairingRequests = targetUserData.pairingRequests || [];
-                            if (!targetPairingRequests.includes(currentUser.uid)) {
-                                targetPairingRequests.push(currentUser.uid);
-                                // Update target user pairing requests
-                                set(targetUserRef, { ...targetUserData, pairingRequests: targetPairingRequests });
-                            }
-                        });
+                if (targetUser) {
+                    // Add pairing request to target user
+                    const targetUserRef = ref(db, 'users/' + targetUser.id);
+                    const targetRequests = targetUser.pairingRequests || [];
+                    if (!targetRequests.includes(currentUser.uid)) {
+                        targetRequests.push(currentUser.uid);
+                        update(targetUserRef, { pairingRequests: targetRequests })
+                            .then(() => alert("Pairing request sent!"))
+                            .catch(error => console.error("Error sending request:", error.message));
+                    } else {
+                        alert("Request already sent.");
+                    }
+                } else {
+                    alert("No user found with the entered ID.");
                 }
             })
-            .catch((error) => {
-                console.error("Error sending pairing request:", error.message);
-            });
+            .catch(error => console.error("Error searching for user:", error.message));
+    } else {
+        alert("User not logged in.");
     }
 }
 
-// Add event listener to search button
-document.getElementById('searchButton').addEventListener('click', searchUser);
+// Add event listeners
+onAuthStateChanged(auth, user => {
+    if (user) {
+        loadUserId();
+    } else {
+        document.getElementById("userId").textContent = "Please log in.";
+    }
+});
+
+document.getElementById("copyIdButton").addEventListener("click", copyUserId);
+document.getElementById("sendRequestButton").addEventListener("click", sendPairingRequest);
