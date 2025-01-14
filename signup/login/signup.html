@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <!-- Use Firebase Modular SDK from CDN -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
+          authDomain: "ocean-35959.firebaseapp.com",
+          projectId: "ocean-35959",
+          storageBucket: "ocean-35959.firebasestorage.app",
+          messagingSenderId: "926712216319",
+          appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
+          measurementId: "G-J844DFXM0W"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Signup function
+        document.getElementById('signupForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const username = document.getElementById("username").value; // Get the username input
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Save user data to Firebase Realtime Database
+                const userRef = ref(db, 'users/' + user.uid);
+                await set(userRef, {
+                    username: username, // Store the provided username
+                    email: user.email,
+                    pairingRequests: [], // Empty initially
+                    pairedWith: null // Not paired yet
+                });
+
+                // Redirect to pairing page after successful signup
+                window.location.href = "user_pairing/pairing.html"; // Correct path to pairing page
+
+
+            } catch (error) {
+                console.error("Error signing up:", error.message);
+                alert(error.message);
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Signup</h1>
+    <form id="signupForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <br>
+        <button type="submit">Signup</button>
+    </form>
+
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+</body>
+</html>
