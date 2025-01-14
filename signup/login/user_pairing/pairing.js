@@ -19,40 +19,65 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// Load the user's unique ID
-function loadUserId() {
-    const currentUser = auth.currentUser;
-    const userIdElement = document.getElementById("userId");
+// Generate a unique code
+function generateUniqueCode() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
-    if (currentUser) {
-        const userRef = ref(db, 'users/' + currentUser.uid);
-        get(userRef)
-            .then(snapshot => {
-                const userData = snapshot.val();
-                if (userData && userData.code) {
-                    userIdElement.textContent = userData.code;
-                } else {
-                    userIdElement.textContent = "No ID found.";
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching user ID:", error.message);
-                userIdElement.textContent = "Error loading ID.";
-            });
-    } else {
-        userIdElement.textContent = "User not logged in.";
+// Load or generate the user's unique ID
+async function loadUserId() {
+    const userIdElement = document.getElementById("userId");
+    userIdElement.textContent = "Loading...";
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+        userIdElement.textContent = "Please log in.";
+        return;
+    }
+
+    try {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const snapshot = await get(userRef);
+        
+        if (!snapshot.exists()) {
+            userIdElement.textContent = "User data not found.";
+            return;
+        }
+
+        const userData = snapshot.val();
+        
+        if (!userData.code) {
+            // Generate and save a new code
+            const newCode = generateUniqueCode();
+            await update(userRef, { code: newCode });
+            userIdElement.textContent = newCode;
+        } else {
+            userIdElement.textContent = userData.code;
+        }
+    } catch (error) {
+        console.error("Error in loadUserId:", error);
+        userIdElement.textContent = "Error loading ID.";
     }
 }
 
 // Copy the user's unique ID to the clipboard
 function copyUserId() {
     const userId = document.getElementById("userId").textContent;
-    if (userId && userId !== "Loading..." && userId !== "No ID found.") {
-        navigator.clipboard.writeText(userId).then(() => {
-            alert("ID copied to clipboard!");
-        });
+    if (userId && userId !== "Loading..." && userId !== "No ID assigned yet." && userId !== "Please log in." && userId !== "Error loading ID.") {
+        navigator.clipboard.writeText(userId)
+            .then(() => {
+                alert("ID copied to clipboard!");
+            })
+            .catch(error => {
+                console.error("Failed to copy ID:", error);
+                alert("Failed to copy ID to clipboard");
+            });
     } else {
-        alert("No ID available to copy.");
+        alert("No valid ID available to copy.");
     }
 }
 
@@ -66,41 +91,60 @@ function sendPairingRequest() {
         return;
     }
 
-    if (currentUser) {
-        const usersRef = ref(db, 'users/');
-        get(usersRef)
-            .then(snapshot => {
-                const users = snapshot.val();
-                let targetUser = null;
-
-                // Find the user with the entered ID
-                for (const userId in users) {
-                    if (users[userId].code === enteredId) {
-                        targetUser = { id: userId, ...users[userId] };
-                        break;
-                    }
-                }
-
-                if (targetUser) {
-                    // Add pairing request to target user
-                    const targetUserRef = ref(db, 'users/' + targetUser.id);
-                    const targetRequests = targetUser.pairingRequests || [];
-                    if (!targetRequests.includes(currentUser.uid)) {
-                        targetRequests.push(currentUser.uid);
-                        update(targetUserRef, { pairingRequests: targetRequests })
-                            .then(() => alert("Pairing request sent!"))
-                            .catch(error => console.error("Error sending request:", error.message));
-                    } else {
-                        alert("Request already sent.");
-                    }
-                } else {
-                    alert("No user found with the entered ID.");
-                }
-            })
-            .catch(error => console.error("Error searching for user:", error.message));
-    } else {
+    if (!currentUser) {
         alert("User not logged in.");
+        return;
     }
+
+    const usersRef = ref(db, 'users/');
+    get(usersRef)
+        .then(snapshot => {
+            if (!snapshot.exists()) {
+                alert("No users found in database.");
+                return;
+            }
+
+            const users = snapshot.val();
+            let targetUser = null;
+
+            // Find the user with the entered ID
+            Object.entries(users).forEach(([userId, userData]) => {
+                if (userData.code === enteredId) {
+                    targetUser = { id: userId, ...userData };
+                }
+            });
+
+            if (!targetUser) {
+                alert("No user found with the entered ID.");
+                return;
+            }
+
+            if (targetUser.id === currentUser.uid) {
+                alert("You cannot send a pairing request to yourself.");
+                return;
+            }
+
+            // Add pairing request to target user
+            const targetUserRef = ref(db, `users/${targetUser.id}`);
+            const targetRequests = targetUser.pairingRequests || [];
+            
+            if (targetRequests.includes(currentUser.uid)) {
+                alert("Request already sent.");
+                return;
+            }
+
+            targetRequests.push(currentUser.uid);
+            update(targetUserRef, { pairingRequests: targetRequests })
+                .then(() => alert("Pairing request sent!"))
+                .catch(error => {
+                    console.error("Error sending request:", error);
+                    alert("Failed to send pairing request.");
+                });
+        })
+        .catch(error => {
+            console.error("Error searching for user:", error);
+            alert("Error occurred while searching for user.");
+        });
 }
 
 // Add event listeners

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to Your Space</h1>
+        <button onclick="window.location.href='../pairing.html'">Pairing Page</button>
+    </header>
+
+    <main>
+        <section id="pairedUserInfo">
+            <h2>Your Paired User</h2>
+            <div id="pairedUserDetails">
+                <p>Loading paired user information...</p>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        // Import and initialize Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
+            authDomain: "ocean-35959.firebaseapp.com",
+            projectId: "ocean-35959",
+            storageBucket: "ocean-35959.firebasestorage.app",
+            messagingSenderId: "926712216319",
+            appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
+            measurementId: "G-J844DFXM0W"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Function to fetch and display paired user information
+        async function fetchPairedUserInfo() {
+            const detailsDiv = document.getElementById("pairedUserDetails");
+            const currentUser = auth.currentUser;
+            
+            if (!currentUser) {
+                detailsDiv.innerHTML = "<p>Please log in to view your paired user.</p>";
+                return;
+            }
+
+            try {
+                // Get current user's data
+                const userRef = ref(db, 'users/' + currentUser.uid);
+                const userSnapshot = await get(userRef);
+                const userData = userSnapshot.val();
+
+                if (!userData || !userData.pairedWith) {
+                    detailsDiv.innerHTML = "<p>You are not paired with anyone yet.</p>";
+                    return;
+                }
+
+                // Get paired user's data
+                const pairedUserRef = ref(db, 'users/' + userData.pairedWith);
+                const pairedSnapshot = await get(pairedUserRef);
+                const pairedUserData = pairedSnapshot.val();
+
+                if (!pairedUserData) {
+                    detailsDiv.innerHTML = "<p>Could not find paired user information.</p>";
+                    return;
+                }
+
+                // Display paired user information
+                detailsDiv.innerHTML = `
+                    <div class="paired-user-card">
+                        <h3>You are paired with:</h3>
+                        <p><strong>Username:</strong> ${pairedUserData.username || 'Unknown User'}</p>
+                        <p><strong>User Code:</strong> ${pairedUserData.code || 'No code available'}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error fetching paired user info:", error);
+                detailsDiv.innerHTML = "<p>Error loading paired user information. Please try again.</p>";
+            }
+        }
+
+        // Listen for auth state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                fetchPairedUserInfo();
+            } else {
+                document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
+            }
+        });
+    </script>
+</body>
+</html>
