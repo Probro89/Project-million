@@ -4,11 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <style>
+        .google-btn {
+            padding: 10px 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .google-btn img {
+            width: 20px;
+            margin-right: 10px;
+        }
+    </style>
     <!-- Use Firebase Modular SDK from CDN -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
-        import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
+        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
+        import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
 
         // Firebase configuration
         const firebaseConfig = {
@@ -25,8 +41,40 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+        const googleProvider = new GoogleAuthProvider();
 
-        // Login function
+        // Google Sign in function
+        document.getElementById('googleLogin').addEventListener('click', async () => {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+                
+                // Check if user exists in database
+                const userRef = ref(db, 'users/' + user.uid);
+                const snapshot = await get(userRef);
+                
+                if (!snapshot.exists()) {
+                    // Create user data if first time login
+                    await set(userRef, {
+                        username: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        pairingRequests: [],
+                        pairedWith: null
+                    });
+                }
+
+                // Store username in localStorage
+                localStorage.setItem('username', snapshot.exists() ? snapshot.val().username : (user.displayName || user.email.split('@')[0]));
+                
+                // Redirect to pairing page
+                window.location.href = "user_pairing/pairing.html";
+            } catch (error) {
+                console.error("Error with Google login:", error.message);
+                alert(error.message);
+            }
+        });
+
+        // Regular Email/Password Login
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
             event.preventDefault();
 
@@ -37,18 +85,13 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Fetch user data from Firebase Realtime Database
                 const userRef = ref(db, 'users/' + user.uid);
                 const userSnapshot = await get(userRef);
 
                 if (userSnapshot.exists()) {
                     const userData = userSnapshot.val();
-                    console.log('Logged in user data:', userData);
-                    // Store username in local storage for later use
                     localStorage.setItem('username', userData.username);
-
-                    // Redirect to pairing page after successful login
-                    window.location.href = "user_pairing/pairing.html"; // Correct path to pairing page
+                    window.location.href = "user_pairing/pairing.html";
                 } else {
                     console.log("No user data found.");
                     alert("No user data found.");
@@ -62,6 +105,15 @@
 </head>
 <body>
     <h1>Login</h1>
+    
+    <!-- Google Login button -->
+    <button id="googleLogin" class="google-btn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+        Login with Google
+    </button>
+
+    <p>Or login with email:</p>
+
     <form id="loginForm">
         <label for="email">Email:</label>
         <input type="email" id="email" required>
