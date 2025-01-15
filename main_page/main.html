@@ -164,21 +164,54 @@
         }
 
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = ref(db, `users/${user.uid}`);
-                const userSnapshot = await get(userRef);
-                const userData = userSnapshot.val();
+    if (user) {
+        const userRef = ref(db, `users/${user.uid}`);
+        try {
+            const userSnapshot = await get(userRef);
+            const userData = userSnapshot.val();
 
+            if (userData) {
                 if (userData.pairedWith) {
                     await updateScores(user.uid, userData.pairedWith);
+                    await displayPairedUserInfo(userData.pairedWith); // Fetch and display paired user info
+                } else {
+                    document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
                 }
-
-                displayNewTask();
-            } else {
-                document.getElementById("currentTask").innerHTML = "<p>Please log in to view tasks.</p>";
-                document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
             }
-        });
+            await displayNewTask(); // Ensure task fetching always happens after authentication
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            document.getElementById("currentTask").innerHTML = "<p>Error loading data. Please try again later.</p>";
+        }
+    } else {
+        document.getElementById("currentTask").innerHTML = "<p>Please log in to view tasks.</p>";
+        document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
+    }
+});
+
+// Define displayPairedUserInfo function here to ensure it is available
+async function displayPairedUserInfo(pairedUserId) {
+    const pairedUserRef = ref(db, `users/${pairedUserId}`);
+    try {
+        const snapshot = await get(pairedUserRef);
+        const pairedUserData = snapshot.val();
+
+        if (pairedUserData) {
+            document.getElementById("pairedUserDetails").innerHTML = `
+                <p><strong>Username:</strong> ${pairedUserData.username || 'Not set'}</p>
+                <p><strong>Score:</strong> ${pairedUserData.score || 0}</p>
+                <p><strong>Status:</strong> ${pairedUserData.online ? 'Online' : 'Offline'}</p>
+            `;
+        } else {
+            document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
+        }
+    } catch (error) {
+        console.error("Error fetching paired user info:", error);
+        document.getElementById("pairedUserDetails").innerHTML = "<p>Error loading paired user information.</p>";
+    }
+}
+
+
     </script>
 </body>
 </html>
