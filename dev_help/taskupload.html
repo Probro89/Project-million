@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Uploader</title>
+</head>
+<body>
+    <h2>Upload Task Lists</h2>
+    <input type="file" id="taskFiles" multiple accept=".txt">
+    <button onclick="uploadTasks()">Upload Tasks</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js"; 
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
+            authDomain: "ocean-35959.firebaseapp.com",
+            projectId: "ocean-35959",
+            storageBucket: "ocean-35959.firebasestorage.app",
+            messagingSenderId: "926712216319",
+            appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
+            measurementId: "G-J844DFXM0W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        window.uploadTasks = async function() {
+    try {
+        // Sign in anonymously first
+        await signInAnonymously(auth);
+        
+        const fileInput = document.getElementById('taskFiles');
+        const files = fileInput.files;
+        
+        const tasks = {
+            list1: [], // 2 points
+            list2: [], // 4 points
+            list3: [], // 6 points
+            list4: []  // 10 points
+        };
+
+        for(let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const text = await file.text();
+            const taskList = text.split('\n').filter(task => task.trim());
+            
+            const listNumber = parseInt(file.name.match(/\d+/)[0]);
+            tasks[`list${listNumber}`] = taskList;
+        }
+
+        await set(ref(db, 'tasks'), tasks);
+        alert('Tasks uploaded successfully!');
+    } catch (error) {
+        console.error('Error uploading tasks:', error);
+        alert('Error uploading tasks: ' + error.message);
+    }
+}
+    </script>
+</body>
+</html>
