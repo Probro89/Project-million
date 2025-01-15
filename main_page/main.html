@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
+        header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .profile-btn {
+        background-color: #2196F3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
         .task-container {
             margin: 20px;
             padding: 20px;
@@ -38,7 +61,12 @@
 <body>
     <header>
         <h1>Welcome to Your Space</h1>
-        <button onclick="window.location.href='../signup/login/user_pairing/pairing.html'">Pairing Page</button>
+        <div class="nav-buttons">
+            <button onclick="window.location.href='../signup/login/user_pairing/pairing.html'">Pairing Page</button>
+            <button class="profile-btn" onclick="window.location.href='profile.html'">
+                👤 Profile
+            </button>
+        </div>
     </header>
 
     <main>

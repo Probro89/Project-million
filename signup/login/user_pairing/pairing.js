@@ -133,8 +133,19 @@ function sendPairingRequest() {
                 return;
             }
 
+            // Add timestamp to the request
+            const pairingTimestamp = Date.now();
             targetRequests.push(currentUser.uid);
-            update(targetUserRef, { pairingRequests: targetRequests })
+            
+            update(targetUserRef, { 
+                pairingRequests: targetRequests,
+                pairingTimestamp: pairingTimestamp // Add timestamp when request is sent
+            })
+                .then(() => {
+                    // Update current user's timestamp as well
+                    const currentUserRef = ref(db, `users/${currentUser.uid}`);
+                    return update(currentUserRef, { pairingTimestamp: pairingTimestamp });
+                })
                 .then(() => alert("Pairing request sent!"))
                 .catch(error => {
                     console.error("Error sending request:", error);
