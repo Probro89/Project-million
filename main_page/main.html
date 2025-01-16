@@ -5,40 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
+        /* Existing styles */
         header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
-    }
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
 
-    .nav-buttons {
-        display: flex;
-        gap: 10px;
-    }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
 
-    .profile-btn {
-        background-color: #2196F3;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
+        .profile-btn {
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         .task-container {
             margin: 20px;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 8px;
         }
+
         .scores {
             display: flex;
             justify-content: space-between;
             margin: 20px;
         }
+
         .pass-btn {
             background-color: #4CAF50;
             color: white;
@@ -48,6 +52,7 @@
             cursor: pointer;
             margin-right: 10px;
         }
+
         .fail-btn {
             background-color: #f44336;
             color: white;
@@ -56,41 +61,101 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-}
 
-.nav-buttons {
-    display: flex;
-    gap: 10px;
-}
+        /* New styles for the modal */
+        .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        overflow-y: auto; /* Enable scrolling */
+    }
 
-.nav-buttons button {
-    background-color: #2196F3;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
+    .modal-content {
+        background-color: white;
+        margin: 5% auto; /* Reduced from 15% to 5% to show more content */
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 500px;
+        position: relative; /* Add position relative */
+        max-height: 90vh; /* Maximum height of 90% of viewport height */
+        display: flex;
+        flex-direction: column;
+    }
 
-.profile-btn {
-    background-color: #2196F3;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+    .modal-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        overflow-y: auto; /* Enable scrolling for content */
+        max-height: calc(80vh - 140px); /* Account for header and buttons */
+        padding-right: 10px; /* Add some padding for the scrollbar */
+    }
+
+    .memory-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .photo-upload {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 10px 0;
+        background-color: white; /* Ensure buttons have white background */
+        position: sticky; /* Make buttons stick to bottom */
+        bottom: 0;
+    }
+
+    .modal-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .submit-btn {
+        background-color: #2196F3;
+        color: white;
+    }
+
+    .skip-btn {
+        background-color: #9e9e9e;
+        color: white;
+    }
+
+    #preview-image {
+        max-width: 100%;
+        max-height: 300px; /* Limit image height */
+        object-fit: contain; /* Maintain aspect ratio */
+        display: none;
+        margin-top: 10px;
+    }
     </style>
 </head>
 <body>
+    <!-- Existing header and main content -->
     <header>
         <h1>Welcome to Your Space</h1>
         <div class="nav-buttons">
@@ -124,11 +189,32 @@
         </section>
     </main>
 
+    <!-- New modal for memory storage -->
+    <div id="memoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Store your memories</h2>
+            </div>
+            <div class="modal-body">
+                <textarea id="memoryText" class="memory-input" placeholder="Write about this moment..."></textarea>
+                <div class="photo-upload">
+                    <input type="file" id="photoInput" accept="image/*">
+                    <img id="preview-image" alt="Preview">
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn skip-btn" onclick="handleMemorySubmission(true)">Skip</button>
+                <button class="modal-btn submit-btn" onclick="handleMemorySubmission(false)">Submit</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
-        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
-
+        import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-storage.js";
+    
         const firebaseConfig = {
             apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
             authDomain: "ocean-35959.firebaseapp.com",
@@ -138,16 +224,64 @@
             appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
             measurementId: "G-J844DFXM0W"
         };
-
+    
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-
+        const storage = getStorage(app);
+    
+        let currentTaskData = {
+        passed: false,
+        points: 0,
+        task: ''
+    };
+        let taskResult = null;
+    
+        // Define core functions first
+        async function updateScores(userId, pairedUserId) {
+            const userRef = ref(db, `users/${userId}`);
+            const pairedUserRef = ref(db, `users/${pairedUserId}`);
+            
+            const [userSnapshot, pairedSnapshot] = await Promise.all([
+                get(userRef),
+                get(pairedUserRef)
+            ]);
+    
+            const userScore = userSnapshot.val().score || 0;
+            const partnerScore = pairedSnapshot.val().score || 0;
+            const combinedScore = userScore + partnerScore;
+    
+            document.getElementById('userScore').textContent = userScore;
+            document.getElementById('partnerScore').textContent = partnerScore;
+            document.getElementById('combinedScore').textContent = combinedScore;
+        }
+    
+        async function displayPairedUserInfo(pairedUserId) {
+            const pairedUserRef = ref(db, `users/${pairedUserId}`);
+            try {
+                const snapshot = await get(pairedUserRef);
+                const pairedUserData = snapshot.val();
+    
+                if (pairedUserData) {
+                    document.getElementById("pairedUserDetails").innerHTML = `
+                        <p><strong>Username:</strong> ${pairedUserData.username || 'Not set'}</p>
+                        <p><strong>Score:</strong> ${pairedUserData.score || 0}</p>
+                        <p><strong>Status:</strong> ${pairedUserData.online ? 'Online' : 'Offline'}</p>
+                    `;
+                } else {
+                    document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
+                }
+            } catch (error) {
+                console.error("Error fetching paired user info:", error);
+                document.getElementById("pairedUserDetails").innerHTML = "<p>Error loading paired user information.</p>";
+            }
+        }
+    
         async function getRandomTask() {
             const tasksRef = ref(db, 'tasks');
             const tasksSnapshot = await get(tasksRef);
             const tasks = tasksSnapshot.val();
-
+    
             const lists = Object.keys(tasks);
             const randomList = lists[Math.floor(Math.random() * lists.length)];
             const taskList = tasks[randomList];
@@ -159,61 +293,79 @@
                 list3: 6,
                 list4: 10
             };
-
+    
             return {
                 task: randomTask,
                 points: points[randomList]
             };
         }
-
+    
         async function displayNewTask() {
-            try {
-                const taskData = await getRandomTask();
-                const taskDiv = document.getElementById("currentTask");
-                taskDiv.innerHTML = `
-                    <p>${taskData.task}</p>
-                    <p>Worth ${taskData.points} points</p>
-                    <div>
-                        <button class="pass-btn" onclick="handleTaskCompletion(true, ${taskData.points})">Pass</button>
-                        <button class="fail-btn" onclick="handleTaskCompletion(false, ${taskData.points})">Fail</button>
-                    </div>
-                `;
-            } catch (error) {
-                console.error("Error displaying task:", error);
-                document.getElementById("currentTask").innerHTML = "<p>Error loading task. Please try again.</p>";
+        try {
+            const taskData = await getRandomTask();
+            const taskDiv = document.getElementById("currentTask");
+            currentTaskData = taskData; // Store the current task data
+            taskDiv.innerHTML = `
+                <p>${taskData.task}</p>
+                <p>Worth ${taskData.points} points</p>
+                <div>
+                    <button class="pass-btn" onclick="handleTaskCompletion(true)">Pass</button>
+                    <button class="fail-btn" onclick="handleTaskCompletion(false)">Fail</button>
+                </div>
+            `;
+        } catch (error) {
+            console.error("Error displaying task:", error);
+            document.getElementById("currentTask").innerHTML = "<p>Error loading task. Please try again.</p>";
+        }
+    }
+
+    // Update task completion handler
+    window.handleTaskCompletion = async function(passed) {
+        currentTaskData.passed = passed;
+        document.getElementById('memoryModal').style.display = 'block';
+    }
+
+    window.handleMemorySubmission = async function(skip) {
+        const modal = document.getElementById('memoryModal');
+        const user = auth.currentUser;
+        
+        if (!user || !currentTaskData) return;
+
+        try {
+            // Store memory if not skipped
+            if (!skip) {
+                const memoryText = document.getElementById('memoryText').value;
+                const photoInput = document.getElementById('photoInput');
+                const file = photoInput.files[0];
+
+                const memoryRef = push(ref(db, `memories/${user.uid}`));
+                const memoryData = {
+                    timestamp: Date.now(),
+                    taskResult: currentTaskData.passed,
+                    points: currentTaskData.points || 0,
+                    task: currentTaskData.task || '',
+                    text: memoryText || ''
+                };
+
+                if (file) {
+                    const imageRef = storageRef(storage, `memories/${user.uid}/${memoryRef.key}`);
+                    await uploadBytes(imageRef, file);
+                    const imageUrl = await getDownloadURL(imageRef);
+                    memoryData.imageUrl = imageUrl;
+                }
+
+                await set(memoryRef, memoryData);
             }
-        }
 
-        async function updateScores(userId, pairedUserId) {
-            const userRef = ref(db, `users/${userId}`);
-            const pairedUserRef = ref(db, `users/${pairedUserId}`);
-            
-            const [userSnapshot, pairedSnapshot] = await Promise.all([
-                get(userRef),
-                get(pairedUserRef)
-            ]);
-
-            const userScore = userSnapshot.val().score || 0;
-            const partnerScore = pairedSnapshot.val().score || 0;
-            const combinedScore = userScore + partnerScore;
-
-            document.getElementById('userScore').textContent = userScore;
-            document.getElementById('partnerScore').textContent = partnerScore;
-            document.getElementById('combinedScore').textContent = combinedScore;
-        }
-
-        window.handleTaskCompletion = async function(passed, points) {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            const userRef = ref(db, `users/${user.uid}`);
-            const userSnapshot = await get(userRef);
-            const userData = userSnapshot.val();
-
-            if (passed) {
+            // Update score if passed
+            if (currentTaskData.passed) {
+                const userRef = ref(db, `users/${user.uid}`);
+                const userSnapshot = await get(userRef);
+                const userData = userSnapshot.val();
                 const currentScore = userData.score || 0;
+                
                 await update(userRef, {
-                    score: currentScore + points
+                    score: currentScore + (currentTaskData.points || 0)
                 });
 
                 if (userData.pairedWith) {
@@ -221,58 +373,75 @@
                 }
             }
 
-            displayNewTask();
-        }
+            // Reset form and hide modal
+            document.getElementById('memoryText').value = '';
+            document.getElementById('photoInput').value = '';
+            document.getElementById('preview-image').style.display = 'none';
+            modal.style.display = 'none';
 
-        onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const userRef = ref(db, `users/${user.uid}`);
-        try {
-            const userSnapshot = await get(userRef);
-            const userData = userSnapshot.val();
+            // Display new task
+            await displayNewTask();
 
-            if (userData) {
-                if (userData.pairedWith) {
-                    await updateScores(user.uid, userData.pairedWith);
-                    await displayPairedUserInfo(userData.pairedWith); // Fetch and display paired user info
-                } else {
-                    document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
-                }
-            }
-            await displayNewTask(); // Ensure task fetching always happens after authentication
         } catch (error) {
-            console.error("Error fetching user data:", error);
-            document.getElementById("currentTask").innerHTML = "<p>Error loading data. Please try again later.</p>";
+            console.error("Error handling memory submission:", error);
+            console.log("Current task data:", currentTaskData); // Add debugging log
+            alert("Error saving memory. Please try again.");
         }
-    } else {
-        document.getElementById("currentTask").innerHTML = "<p>Please log in to view tasks.</p>";
-        document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
     }
-});
-
-// Define displayPairedUserInfo function here to ensure it is available
-async function displayPairedUserInfo(pairedUserId) {
-    const pairedUserRef = ref(db, `users/${pairedUserId}`);
-    try {
-        const snapshot = await get(pairedUserRef);
-        const pairedUserData = snapshot.val();
-
-        if (pairedUserData) {
-            document.getElementById("pairedUserDetails").innerHTML = `
-                <p><strong>Username:</strong> ${pairedUserData.username || 'Not set'}</p>
-                <p><strong>Score:</strong> ${pairedUserData.score || 0}</p>
-                <p><strong>Status:</strong> ${pairedUserData.online ? 'Online' : 'Offline'}</p>
-            `;
-        } else {
-            document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
+            
+        
+    
+        // Add photo preview functionality
+        document.getElementById('photoInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                const previewImage = document.getElementById('preview-image');
+                
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('memoryModal');
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
         }
-    } catch (error) {
-        console.error("Error fetching paired user info:", error);
-        document.getElementById("pairedUserDetails").innerHTML = "<p>Error loading paired user information.</p>";
-    }
-}
-
-
+    
+        // Initialize the page
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = ref(db, `users/${user.uid}`);
+                try {
+                    const userSnapshot = await get(userRef);
+                    const userData = userSnapshot.val();
+    
+                    if (userData) {
+                        if (userData.pairedWith) {
+                            await updateScores(user.uid, userData.pairedWith);
+                            await displayPairedUserInfo(userData.pairedWith);
+                        } else {
+                            document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
+                        }
+                    }
+                    await displayNewTask();
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                    document.getElementById("currentTask").innerHTML = "<p>Error loading data. Please try again later.</p>";
+                }
+            } else {
+                document.getElementById("currentTask").innerHTML = "<p>Please log in to view tasks.</p>";
+                document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
+            }
+        });
     </script>
-</body>
-</html>
+    
+    </body>
+    </html>
