@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task History</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .task-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .task-item.passed {
+            border-left: 5px solid #4CAF50;
+        }
+
+        .task-item.failed {
+            border-left: 5px solid #f44336;
+        }
+
+        .task-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .task-points {
+            font-weight: bold;
+            color: #2196F3;
+            margin-top: 10px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .memory-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .task-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .memory-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #444;
+            margin: 20px 0;
+        }
+
+        .share-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .share-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s;
+        }
+
+        .share-btn:hover {
+            background: #1976D2;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .status-badge.passed {
+            background: #E8F5E9;
+            color: #4CAF50;
+        }
+
+        .status-badge.failed {
+            background: #FFEBEE;
+            color: #f44336;
+        }
+
+        .nav-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <button class="nav-btn" onclick="window.location.href='main.html'">Back to Main</button>
+            <h1>Your Task History</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="history-grid" class="history-grid">
+            <!-- Tasks will be populated here -->
+        </div>
+    </div>
+
+    <!-- Memory Card Modal -->
+    <div id="memoryModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+                <!-- Memory card content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
+            authDomain: "ocean-35959.firebaseapp.com",
+            projectId: "ocean-35959",
+            storageBucket: "ocean-35959.firebasestorage.app",
+            messagingSenderId: "926712216319",
+            appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
+            measurementId: "G-J844DFXM0W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        function formatDate(timestamp) {
+            return new Date(timestamp).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function loadTaskHistory(userId) {
+            const memoriesRef = ref(db, `memories/${userId}`);
+            try {
+                const snapshot = await get(memoriesRef);
+                const memories = snapshot.val();
+                const historyGrid = document.getElementById('history-grid');
+                historyGrid.innerHTML = '';
+
+                if (memories) {
+                    Object.entries(memories).reverse().forEach(([id, memory]) => {
+                        const taskElement = document.createElement('div');
+                        taskElement.className = `task-item ${memory.taskResult ? 'passed' : 'failed'}`;
+                        taskElement.innerHTML = `
+                            <div class="status-badge ${memory.taskResult ? 'passed' : 'failed'}">
+                                ${memory.taskResult ? 'Passed' : 'Failed'}
+                            </div>
+                            <div class="task-date">${formatDate(memory.timestamp)}</div>
+                            <div>${memory.task}</div>
+                            <div class="task-points">${memory.points} points</div>
+                        `;
+                        taskElement.onclick = () => showMemoryCard(memory);
+                        historyGrid.appendChild(taskElement);
+                    });
+                } else {
+                    historyGrid.innerHTML = '<p>No task history found.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading task history:", error);
+                document.getElementById('history-grid').innerHTML = '<p>Error loading task history.</p>';
+            }
+        }
+
+        window.showMemoryCard = function(memory) {
+            const modal = document.getElementById('memoryModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <div class="memory-card">
+                    <div class="status-badge ${memory.taskResult ? 'passed' : 'failed'}">
+                        ${memory.taskResult ? 'Passed' : 'Failed'}
+                    </div>
+                    <h2 class="task-title">${memory.task}</h2>
+                    <p class="memory-text">${memory.text}</p>
+                    <div class="task-points">${memory.points} points</div>
+                    <div class="task-date">${formatDate(memory.timestamp)}</div>
+                </div>
+                <div class="share-section">
+                    <button class="share-btn" onclick="shareMemory('${encodeURIComponent(JSON.stringify(memory))}')">
+                        Share Memory
+                    </button>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        window.closeModal = function() {
+            document.getElementById('memoryModal').style.display = 'none';
+        }
+
+        window.shareMemory = async function(memoryData) {
+            const memory = JSON.parse(decodeURIComponent(memoryData));
+            const shareText = `Task: ${memory.task}\nMemory: ${memory.text}\nPoints: ${memory.points}\nStatus: ${memory.taskResult ? 'Passed' : 'Failed'}`;
+            
+            try {
+                if (navigator.share) {
+                    await navigator.share({
+                        title: 'Shared Memory',
+                        text: shareText
+                    });
+                } else {
+                    // Fallback to clipboard
+                    await navigator.clipboard.writeText(shareText);
+                    alert('Memory copied to clipboard!');
+                }
+            } catch (error) {
+                console.error('Error sharing:', error);
+                alert('Error sharing memory');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('memoryModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize the page
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadTaskHistory(user.uid);
+            } else {
+                document.getElementById('history-grid').innerHTML = '<p>Please log in to view your task history.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

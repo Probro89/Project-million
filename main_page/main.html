@@ -62,96 +62,82 @@
             cursor: pointer;
         }
 
-        /* New styles for the modal */
+        /* Modal styles */
         .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        overflow-y: auto; /* Enable scrolling */
-    }
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
 
-    .modal-content {
-        background-color: white;
-        margin: 5% auto; /* Reduced from 15% to 5% to show more content */
-        padding: 20px;
-        border-radius: 8px;
-        width: 80%;
-        max-width: 500px;
-        position: relative; /* Add position relative */
-        max-height: 90vh; /* Maximum height of 90% of viewport height */
-        display: flex;
-        flex-direction: column;
-    }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .modal-header {
-        text-align: center;
-        margin-bottom: 20px;
-    }
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-    .modal-body {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        overflow-y: auto; /* Enable scrolling for content */
-        max-height: calc(80vh - 140px); /* Account for header and buttons */
-        padding-right: 10px; /* Add some padding for the scrollbar */
-    }
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            max-height: calc(80vh - 140px);
+            padding-right: 10px;
+        }
 
-    .memory-input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        resize: vertical;
-        min-height: 100px;
-    }
+        .memory-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 100px;
+        }
 
-    .photo-upload {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 10px 0;
+            background-color: white;
+            position: sticky;
+            bottom: 0;
+        }
 
-    .modal-buttons {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 20px;
-        padding: 10px 0;
-        background-color: white; /* Ensure buttons have white background */
-        position: sticky; /* Make buttons stick to bottom */
-        bottom: 0;
-    }
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-    .modal-btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+        .submit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
 
-    .submit-btn {
-        background-color: #2196F3;
-        color: white;
-    }
-
-    .skip-btn {
-        background-color: #9e9e9e;
-        color: white;
-    }
-
-    #preview-image {
-        max-width: 100%;
-        max-height: 300px; /* Limit image height */
-        object-fit: contain; /* Maintain aspect ratio */
-        display: none;
-        margin-top: 10px;
-    }
+        .skip-btn {
+            background-color: #9e9e9e;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -189,7 +175,7 @@
         </section>
     </main>
 
-    <!-- New modal for memory storage -->
+    <!-- Memory modal -->
     <div id="memoryModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -197,10 +183,6 @@
             </div>
             <div class="modal-body">
                 <textarea id="memoryText" class="memory-input" placeholder="Write about this moment..."></textarea>
-                <div class="photo-upload">
-                    <input type="file" id="photoInput" accept="image/*">
-                    <img id="preview-image" alt="Preview">
-                </div>
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn skip-btn" onclick="handleMemorySubmission(true)">Skip</button>
@@ -213,7 +195,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
         import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-storage.js";
     
         const firebaseConfig = {
             apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
@@ -228,16 +209,14 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const storage = getStorage(app);
     
         let currentTaskData = {
-        passed: false,
-        points: 0,
-        task: ''
-    };
-        let taskResult = null;
+            passed: false,
+            points: 0,
+            task: ''
+        };
     
-        // Define core functions first
+        // Core functions
         async function updateScores(userId, pairedUserId) {
             const userRef = ref(db, `users/${userId}`);
             const pairedUserRef = ref(db, `users/${pairedUserId}`);
@@ -301,111 +280,79 @@
         }
     
         async function displayNewTask() {
-        try {
-            const taskData = await getRandomTask();
-            const taskDiv = document.getElementById("currentTask");
-            currentTaskData = taskData; // Store the current task data
-            taskDiv.innerHTML = `
-                <p>${taskData.task}</p>
-                <p>Worth ${taskData.points} points</p>
-                <div>
-                    <button class="pass-btn" onclick="handleTaskCompletion(true)">Pass</button>
-                    <button class="fail-btn" onclick="handleTaskCompletion(false)">Fail</button>
-                </div>
-            `;
-        } catch (error) {
-            console.error("Error displaying task:", error);
-            document.getElementById("currentTask").innerHTML = "<p>Error loading task. Please try again.</p>";
-        }
-    }
-
-    // Update task completion handler
-    window.handleTaskCompletion = async function(passed) {
-        currentTaskData.passed = passed;
-        document.getElementById('memoryModal').style.display = 'block';
-    }
-
-    window.handleMemorySubmission = async function(skip) {
-        const modal = document.getElementById('memoryModal');
-        const user = auth.currentUser;
-        
-        if (!user || !currentTaskData) return;
-
-        try {
-            // Store memory if not skipped
-            if (!skip) {
-                const memoryText = document.getElementById('memoryText').value;
-                const photoInput = document.getElementById('photoInput');
-                const file = photoInput.files[0];
-
-                const memoryRef = push(ref(db, `memories/${user.uid}`));
-                const memoryData = {
-                    timestamp: Date.now(),
-                    taskResult: currentTaskData.passed,
-                    points: currentTaskData.points || 0,
-                    task: currentTaskData.task || '',
-                    text: memoryText || ''
-                };
-
-                if (file) {
-                    const imageRef = storageRef(storage, `memories/${user.uid}/${memoryRef.key}`);
-                    await uploadBytes(imageRef, file);
-                    const imageUrl = await getDownloadURL(imageRef);
-                    memoryData.imageUrl = imageUrl;
-                }
-
-                await set(memoryRef, memoryData);
+            try {
+                const taskData = await getRandomTask();
+                const taskDiv = document.getElementById("currentTask");
+                currentTaskData = taskData;
+                taskDiv.innerHTML = `
+                    <p>${taskData.task}</p>
+                    <p>Worth ${taskData.points} points</p>
+                    <div>
+                        <button class="pass-btn" onclick="handleTaskCompletion(true)">Pass</button>
+                        <button class="fail-btn" onclick="handleTaskCompletion(false)">Fail</button>
+                    </div>
+                `;
+            } catch (error) {
+                console.error("Error displaying task:", error);
+                document.getElementById("currentTask").innerHTML = "<p>Error loading task. Please try again.</p>";
             }
-
-            // Update score if passed
-            if (currentTaskData.passed) {
-                const userRef = ref(db, `users/${user.uid}`);
-                const userSnapshot = await get(userRef);
-                const userData = userSnapshot.val();
-                const currentScore = userData.score || 0;
-                
-                await update(userRef, {
-                    score: currentScore + (currentTaskData.points || 0)
-                });
-
-                if (userData.pairedWith) {
-                    await updateScores(user.uid, userData.pairedWith);
-                }
-            }
-
-            // Reset form and hide modal
-            document.getElementById('memoryText').value = '';
-            document.getElementById('photoInput').value = '';
-            document.getElementById('preview-image').style.display = 'none';
-            modal.style.display = 'none';
-
-            // Display new task
-            await displayNewTask();
-
-        } catch (error) {
-            console.error("Error handling memory submission:", error);
-            console.log("Current task data:", currentTaskData); // Add debugging log
-            alert("Error saving memory. Please try again.");
         }
-    }
+
+        window.handleTaskCompletion = async function(passed) {
+            currentTaskData.passed = passed;
+            document.getElementById('memoryModal').style.display = 'block';
+        }
+
+        window.handleMemorySubmission = async function(skip) {
+            const modal = document.getElementById('memoryModal');
+            const user = auth.currentUser;
             
-        
-    
-        // Add photo preview functionality
-        document.getElementById('photoInput').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                const previewImage = document.getElementById('preview-image');
-                
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewImage.style.display = 'block';
-                };
-                
-                reader.readAsDataURL(file);
+            if (!user || !currentTaskData) return;
+
+            try {
+                // Store memory if not skipped
+                if (!skip) {
+                    const memoryText = document.getElementById('memoryText').value;
+                    const memoryRef = push(ref(db, `memories/${user.uid}`));
+                    const memoryData = {
+                        timestamp: Date.now(),
+                        taskResult: currentTaskData.passed,
+                        points: currentTaskData.points || 0,
+                        task: currentTaskData.task || '',
+                        text: memoryText || ''
+                    };
+
+                    await set(memoryRef, memoryData);
+                }
+
+                // Update score if passed
+                if (currentTaskData.passed) {
+                    const userRef = ref(db, `users/${user.uid}`);
+                    const userSnapshot = await get(userRef);
+                    const userData = userSnapshot.val();
+                    const currentScore = userData.score || 0;
+                    
+                    await update(userRef, {
+                        score: currentScore + (currentTaskData.points || 0)
+                    });
+
+                    if (userData.pairedWith) {
+                        await updateScores(user.uid, userData.pairedWith);
+                    }
+                }
+
+                // Reset form and hide modal
+                document.getElementById('memoryText').value = '';
+                modal.style.display = 'none';
+
+                // Display new task
+                await displayNewTask();
+
+            } catch (error) {
+                console.error("Error handling memory submission:", error);
+                alert("Error saving memory. Please try again.");
             }
-        });
+        }
     
         // Close modal when clicking outside
         window.onclick = function(event) {
@@ -444,4 +391,4 @@
     </script>
     
     </body>
-    </html>
+</html>
