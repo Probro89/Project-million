@@ -1,25 +1,119 @@
+/* Reset + Typography */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Comic Sans MS', 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     text-align: center;
+    background-color: #fff0f5;
+    color: #5c5470;
 }
 
+/* Header */
 header {
-    background-color: #f8f8f8;
-    padding: 10px;
+    background-color: #ffe4ec;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-bottom: 2px solid #ffc3d9;
 }
 
+header h1 {
+    color: #d16ba5;
+    font-size: 2em;
+    margin: 0;
+}
+
+/* Inputs and Buttons */
 input {
-    padding: 10px;
-    margin-top: 20px;
+    padding: 12px 15px;
+    margin-top: 25px;
+    border: 2px solid #ffb6c1;
+    border-radius: 10px;
+    background-color: #fffafc;
+    font-size: 1em;
+    outline: none;
+    width: 250px;
+    box-shadow: 0 2px 5px rgba(255, 182, 193, 0.2);
 }
 
+input:focus {
+    border-color: #ffc0cb;
+    background-color: #fff0f5;
+}
+
+/* Buttons */
 button {
-    padding: 10px;
-    margin: 10px;
+    padding: 12px 20px;
+    margin: 15px 10px;
+    border: none;
+    border-radius: 12px;
+    background-color: #ff85b3;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
 }
 
+button:hover {
+    background-color: #f06292;
+    transform: scale(1.05);
+}
+
+/* Results Box */
 #searchResults {
-    margin-top: 20px;
+    margin-top: 30px;
+    background-color: #fff5fb;
+    border: 2px dashed #ffc3d9;
+    border-radius: 15px;
+    padding: 25px;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Cute Heart Animation */
+.heart-wrapper {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60px;
+}
+
+.love-heart {
+    width: 24px;
+    height: 24px;
+    position: relative;
+    display: inline-block;
+    animation: heartbeat 1.4s infinite ease-in-out;
+    transform: rotate(-90deg);
+    background: #ff69b4;
+    overflow: visible; /* 💖 Key fix */
+}
+
+.love-heart::before,
+.love-heart::after {
+    content: "";
+    width: 24px;
+    height: 24px;
+    background: #ff69b4;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.love-heart::before {
+    left: -12px;
+    top: 0;
+}
+
+.love-heart::after {
+    top: -12px;
+    left: 0;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1) ; }
+    25%, 75% { transform: scale(1.2) ; }
+    50% { transform: scale(1.4) ; }
 }

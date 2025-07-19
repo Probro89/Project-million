@@ -9,17 +9,18 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
         }
 
         body {
-            background-color: #f5f5f5;
+            background-color: #fff0f5;
         }
 
         header {
-            background-color: white;
+            background-color: #ffe4ec;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid #ffc3d9;
         }
 
         .container {
@@ -29,14 +30,37 @@
         }
 
         .points-display {
-            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #fbb1bd 0%, #dbc4f0 100%);
+            color: #fff;
+            padding: 25px;
+            border-radius: 15px;
             margin: 20px 0;
             text-align: center;
-            font-size: 1.5em;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 1.8em;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .love-meter {
+            margin-top: 15px;
+            height: 18px;
+            background: #fce4ec;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .love-meter-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ffb6c1, #ffc0cb, #eec9ff);
+            width: 60%;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
         }
 
         .rewards-grid {
@@ -47,25 +71,25 @@
         }
 
         .reward-card {
-            background: white;
-            border-radius: 15px;
+            background: #fffafc;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.05);
             transition: transform 0.2s;
         }
 
         .reward-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-6px);
         }
 
         .reward-title {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            color: #333;
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: #d16ba5;
         }
 
         .reward-points {
-            color: #2196F3;
+            color: #ff69b4;
             font-weight: bold;
             font-size: 1.2em;
             margin-bottom: 15px;
@@ -73,22 +97,22 @@
 
         .reward-description {
             color: #666;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             line-height: 1.5;
         }
 
         .details-list {
             margin-left: 20px;
             margin-bottom: 20px;
-            color: #555;
+            color: #444;
         }
 
         .redeem-btn {
-            background: #4CAF50;
+            background: #ff85b3;
             color: white;
             border: none;
             padding: 12px 25px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-size: 1.1em;
@@ -96,20 +120,20 @@
         }
 
         .redeem-btn:hover {
-            background: #388E3C;
+            background: #f06292;
         }
 
         .redeem-btn:disabled {
-            background: #ccc;
+            background: #fbd0dc;
             cursor: not-allowed;
         }
 
         .nav-btn {
-            background: #2196F3;
+            background: #a78bfa;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             margin-right: 10px;
         }
@@ -122,24 +146,26 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.3);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: white;
+            background: #fff5fb;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 20px;
             max-width: 500px;
             width: 90%;
             text-align: center;
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
         }
 
         .modal-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: #d16ba5;
         }
 
         .modal-buttons {
@@ -151,19 +177,19 @@
 
         .modal-btn {
             padding: 10px 25px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             border: none;
             font-size: 1em;
         }
 
         .confirm-btn {
-            background: #4CAF50;
-            color: white;
+            background: #a3e4d7;
+            color: #34495e;
         }
 
         .cancel-btn {
-            background: #f44336;
+            background: #f67280;
             color: white;
         }
     </style>
@@ -171,14 +197,17 @@
 <body>
     <header>
         <div class="container">
-            <button class="nav-btn" onclick="window.location.href='main.html'">Back to Main</button>
-            <h1>Rewards Shop</h1>
+            <button class="nav-btn" onclick="window.location.href='main.html'">← Back to Main</button>
+            <h1 style="display: inline-block; margin-left: 20px; color: #d16ba5;">Rewards Shop 💕</h1>
         </div>
     </header>
 
     <div class="container">
         <div class="points-display">
             Your Points Balance: <span id="pointsBalance">0</span>
+            <div class="love-meter">
+                <div class="love-meter-bar" id="loveMeterBar"></div>
+            </div>
         </div>
 
         <div class="rewards-grid" id="rewardsGrid">
@@ -189,7 +218,7 @@
     <!-- Confirmation Modal -->
     <div id="confirmModal" class="modal">
         <div class="modal-content">
-            <h2 class="modal-title">Confirm Redemption</h2>
+            <h2 class="modal-title">Confirm Redemption 💝</h2>
             <p id="modalMessage"></p>
             <div class="modal-buttons">
                 <button class="modal-btn cancel-btn" onclick="closeModal()">Cancel</button>
@@ -223,19 +252,19 @@
         const rewards = [
             {
                 id: 'snack-run',
-                title: 'Favorite Snack Run',
+                title: 'Favorite Snack Run 🍪',
                 points: 100,
-                description: "The partner must bring the redeemer's favorite snack or drink within the day.",
+                description: "Your partner brings your fav snack personally! No delivery shortcuts 💕",
                 details: [
-                    "The snack must be specific (e.g., their favorite brand or flavor)",
-                    "The partner can't just give cash or send delivery—it must be a personal effort"
+                    "Must be your *exact* favorite item 🧁",
+                    "No online delivery—only hand-delivered love!"
                 ]
             },
             {
                 id: 'say-yes',
-                title: 'Say "yes"',
+                title: 'Say “Yes” for 1 Hour 💖',
                 points: 50,
-                description: "The partner can't deny to anything the redeemer says for one hour (reasonable requests).",
+                description: "For 1 hour, your partner says yes to everything (within reason!).",
                 details: []
             }
         ];
@@ -248,14 +277,12 @@
                 const canRedeem = userPoints >= reward.points;
                 const rewardElement = document.createElement('div');
                 rewardElement.className = 'reward-card';
-                
+
                 let detailsHtml = '';
                 if (reward.details.length > 0) {
-                    detailsHtml = `
-                        <ul class="details-list">
-                            ${reward.details.map(detail => `<li>${detail}</li>`).join('')}
-                        </ul>
-                    `;
+                    detailsHtml = `<ul class="details-list">
+                        ${reward.details.map(detail => `<li>${detail}</li>`).join('')}
+                    </ul>`;
                 }
 
                 rewardElement.innerHTML = `
@@ -263,15 +290,20 @@
                     <div class="reward-points">${reward.points} Points</div>
                     <p class="reward-description">${reward.description}</p>
                     ${detailsHtml}
-                    <button class="redeem-btn" 
-                            onclick="initiateRedemption('${reward.id}')"
-                            ${canRedeem ? '' : 'disabled'}>
-                        ${canRedeem ? 'Redeem Reward' : 'Not Enough Points'}
+                    <button class="redeem-btn"
+                        onclick="initiateRedemption('${reward.id}')"
+                        ${canRedeem ? '' : 'disabled'}>
+                        ${canRedeem ? 'Redeem Reward 💘' : 'Not Enough Points 😢'}
                     </button>
                 `;
-                
+
                 rewardsGrid.appendChild(rewardElement);
             });
+
+            // update love meter width
+            const loveMeterBar = document.getElementById('loveMeterBar');
+            let width = Math.min(100, userPoints); // limit 100%
+            loveMeterBar.style.width = width + "%";
         }
 
         async function loadUserPoints(userId) {
@@ -292,8 +324,8 @@
             const modal = document.getElementById('confirmModal');
             const message = document.getElementById('modalMessage');
             message.innerHTML = `
-                Are you sure you want to redeem "${selectedReward.title}" for ${selectedReward.points} points?<br><br>
-                This will notify your partner and deduct the points from your balance.
+                Are you sure you want to redeem "<strong>${selectedReward.title}</strong>" for ${selectedReward.points} points?<br><br>
+                Your partner will be notified 💌
             `;
             modal.style.display = 'flex';
         }
@@ -318,7 +350,6 @@
                     return;
                 }
 
-                // Create redemption record
                 const redemptionRef = push(ref(db, `redemptions/${currentUser.uid}`));
                 await set(redemptionRef, {
                     rewardId: selectedReward.id,
@@ -329,23 +360,21 @@
                     partnerId: userData.pairedWith
                 });
 
-                // Update user points
                 await update(userRef, {
                     score: currentPoints - selectedReward.points
                 });
 
-                alert('Reward redeemed successfully! Your partner will be notified.');
+                alert('Reward redeemed successfully! 💕');
                 closeModal();
-                loadUserPoints(currentUser.uid); // Refresh points display
+                loadUserPoints(currentUser.uid);
 
             } catch (error) {
                 console.error("Error redeeming reward:", error);
-                alert('Error redeeming reward. Please try again.');
+                alert('Oops! Something went wrong.');
                 closeModal();
             }
         }
 
-        // Initialize the page
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -356,7 +385,6 @@
             }
         });
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('confirmModal');
             if (event.target === modal) {

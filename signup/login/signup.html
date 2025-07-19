@@ -1,127 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-    <style>
-        .google-btn {
-            padding: 10px 20px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin: 10px 0;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffd6e8 0%, #fff0f5 100%);
+      font-family: 'Quicksand', sans-serif;
+      color: #444;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 2.8em;
+      color: #d63384;
+      margin-bottom: 10px;
+    }
+
+    form, .google-btn {
+      background-color: #fff;
+      border: 2px dashed #ffa6c1;
+      padding: 20px 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 16px rgba(255, 182, 193, 0.2);
+      margin: 15px 0;
+      width: 300px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #d63384;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ffd6e8;
+      border-radius: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+      background-color: #ff6fa4;
+      color: white;
+      padding: 10px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #ff4c91;
+    }
+
+    .google-btn {
+      justify-content: center;
+      border: 2px dashed #f9c5d1;
+    }
+
+    .google-btn img {
+      width: 22px;
+      margin-right: 10px;
+    }
+
+    .google-btn:hover {
+      background-color: #ffe9f0;
+    }
+
+    p {
+      font-size: 0.95em;
+      color: #b30059;
+    }
+
+    a {
+      color: #d63384;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Optional decorative heart */
+    body::before {
+      content: "💕";
+      font-size: 60px;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
+  </style>
+
+  <!-- JS (unchanged) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js';
+    import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
+    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
+      authDomain: "ocean-35959.firebaseapp.com",
+      projectId: "ocean-35959",
+      storageBucket: "ocean-35959.firebasestorage.app",
+      messagingSenderId: "926712216319",
+      appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
+      measurementId: "G-J844DFXM0W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    document.getElementById('googleSignup').addEventListener('click', async () => {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+
+        const userRef = ref(db, 'users/' + user.uid);
+        const snapshot = await get(userRef);
+
+        if (!snapshot.exists()) {
+          await set(userRef, {
+            username: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            pairingRequests: [],
+            pairedWith: null
+          });
         }
-        .google-btn img {
-            width: 20px;
-            margin-right: 10px;
-        }
-    </style>
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
-        import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
-            authDomain: "ocean-35959.firebaseapp.com",
-            projectId: "ocean-35959",
-            storageBucket: "ocean-35959.firebasestorage.app",
-            messagingSenderId: "926712216319",
-            appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
-            measurementId: "G-J844DFXM0W"
-        };
+        window.location.href = "user_pairing/pairing.html";
+      } catch (error) {
+        console.error("Error with Google signup:", error.message);
+        alert(error.message);
+      }
+    });
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const googleProvider = new GoogleAuthProvider();
+    document.getElementById('signupForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
 
-        // Google Sign in function
-        document.getElementById('googleSignup').addEventListener('click', async () => {
-            try {
-                const result = await signInWithPopup(auth, googleProvider);
-                const user = result.user;
-                
-                // Check if user already exists
-                const userRef = ref(db, 'users/' + user.uid);
-                const snapshot = await get(userRef);
-                
-                if (!snapshot.exists()) {
-                    // Save new user data to Firebase Realtime Database
-                    await set(userRef, {
-                        username: user.displayName || user.email.split('@')[0],
-                        email: user.email,
-                        pairingRequests: [],
-                        pairedWith: null
-                    });
-                }
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const username = document.getElementById("username").value;
 
-                // Redirect to pairing page
-                window.location.href = "user_pairing/pairing.html";
-            } catch (error) {
-                console.error("Error with Google signup:", error.message);
-                alert(error.message);
-            }
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        const userRef = ref(db, 'users/' + user.uid);
+        await set(userRef, {
+          username: username,
+          email: user.email,
+          pairingRequests: [],
+          pairedWith: null
         });
 
-        // Regular Email/Password Signup
-        document.getElementById('signupForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const username = document.getElementById("username").value;
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                const userRef = ref(db, 'users/' + user.uid);
-                await set(userRef, {
-                    username: username,
-                    email: user.email,
-                    pairingRequests: [],
-                    pairedWith: null
-                });
-
-                window.location.href = "user_pairing/pairing.html";
-            } catch (error) {
-                console.error("Error signing up:", error.message);
-                alert(error.message);
-            }
-        });
-    </script>
+        window.location.href = "user_pairing/pairing.html";
+      } catch (error) {
+        console.error("Error signing up:", error.message);
+        alert(error.message);
+      }
+    });
+  </script>
 </head>
 <body>
-    <h1>Signup</h1>
-    
-    <!-- Google Sign up button -->
-    <button id="googleSignup" class="google-btn">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
-        Sign up with Google
-    </button>
+  <h1>Signup</h1>
 
-    <p>Or sign up with email:</p>
+  <!-- Google Sign up button -->
+  <button id="googleSignup" class="google-btn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
+    Sign up with Google
+  </button>
 
-    <form id="signupForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" required>
-        <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" required>
-        <br>
-        <button type="submit">Signup</button>
-    </form>
+  <p>Or sign up with email:</p>
 
-    <p>Already have an account? <a href="login.html">Login here</a></p>
+  <form id="signupForm">
+    <label for="username">Username:</label>
+    <input type="text" id="username" required>
+    <br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" required>
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" required>
+    <br>
+    <button type="submit">Signup</button>
+  </form>
+
+  <p>Already have an account? <a href="login.html">Login here</a></p>
 </body>
 </html>

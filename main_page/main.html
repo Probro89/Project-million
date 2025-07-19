@@ -1,394 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page</title>
-    <style>
-        /* Existing styles */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Main Page</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #fbeaea, #ffe6f0);
+      color: #5a2a4f;
+      margin: 0;
+    }
 
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
+    header {
+      background-color: #fff0f5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px;
+      box-shadow: 0 2px 6px rgba(90, 42, 79, 0.1);
+    }
 
-        .profile-btn {
-            background-color: #2196F3;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    header h1 {
+      font-size: 28px;
+      color: #8b2e5f;
+    }
 
-        .task-container {
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
+    .nav-buttons button,
+    .profile-btn {
+      background: #da6484;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
 
-        .scores {
-            display: flex;
-            justify-content: space-between;
-            margin: 20px;
-        }
+    .nav-buttons button:hover,
+    .profile-btn:hover {
+      background: #b93f69;
+    }
 
-        .pass-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
+    .task-container,
+    #pairedUserInfo {
+      margin: 20px auto;
+      padding: 24px;
+      border-radius: 16px;
+      background-color: #fff7fa;
+      box-shadow: 0 2px 10px rgba(90, 42, 79, 0.1);
+      max-width: 700px;
+    }
 
-        .fail-btn {
-            background-color: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    .scores {
+      display: flex;
+      justify-content: space-around;
+      background: #ffe6eb;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 20px auto;
+      max-width: 600px;
+      font-size: 18px;
+    }
 
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            overflow-y: auto;
-        }
+    .pass-btn {
+      background-color: #e75480;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
 
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 500px;
-            position: relative;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
+    .fail-btn {
+      background-color: #b22222;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+    }
 
-        .modal-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(112, 52, 73, 0.4);
+      z-index: 1000;
+      overflow-y: auto;
+    }
 
-        .modal-body {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            overflow-y: auto;
-            max-height: calc(80vh - 140px);
-            padding-right: 10px;
-        }
+    .modal-content {
+      background-color: #fff0f7;
+      margin: 5% auto;
+      padding: 24px;
+      border-radius: 20px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(90, 42, 79, 0.3);
+    }
 
-        .memory-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            resize: vertical;
-            min-height: 100px;
-        }
+    .modal-header h2 {
+      text-align: center;
+      color: #b23a6f;
+    }
 
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 10px 0;
-            background-color: white;
-            position: sticky;
-            bottom: 0;
-        }
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
 
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+    .memory-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e1a3bb;
+      border-radius: 10px;
+      resize: vertical;
+      background-color: #fff5fa;
+      color: #6d3c53;
+    }
 
-        .submit-btn {
-            background-color: #2196F3;
-            color: white;
-        }
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-        .skip-btn {
-            background-color: #9e9e9e;
-            color: white;
-        }
-    </style>
+    .modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .submit-btn {
+      background-color: #c71585;
+      color: white;
+    }
+
+    .skip-btn {
+      background-color: #a9a9a9;
+      color: white;
+    }
+  </style>
 </head>
 <body>
-    <!-- Existing header and main content -->
-    <header>
-        <h1>Welcome to Your Space</h1>
-        <div class="nav-buttons">
-            <button onclick="window.location.href='../signup/login/user_pairing/pairing.html'">Pairing Page</button>
-            <button onclick="window.location.href='task-history.html'">Task History</button>
-            <button onclick="window.location.href='shop.html'">Shop</button>
-            <button class="profile-btn" onclick="window.location.href='profile.html'">
-                👤 Profile
-            </button>
-        </div>
-    </header>
+  <header>
+    <h1>Welcome to Your Space</h1>
+    <div class="nav-buttons">
+      <button onclick="window.location.href='../signup/login/user_pairing/pairing.html'">Pairing Page</button>
+      <button onclick="window.location.href='task-history.html'">Task History</button>
+      <button onclick="window.location.href='shop.html'">Shop</button>
+      <button class="profile-btn" onclick="window.location.href='profile.html'">💋 Profile</button>
+    </div>
+  </header>
 
-    <main>
-        <div class="scores">
-            <div>Your Score: <span id="userScore">0</span></div>
-            <div>Partner's Score: <span id="partnerScore">0</span></div>
-            <div>Combined Score: <span id="combinedScore">0</span></div>
-        </div>
-
-        <section id="taskSection" class="task-container">
-            <h2>Current Task</h2>
-            <div id="currentTask">
-                <p>Loading task...</p>
-            </div>
-        </section>
-
-        <section id="pairedUserInfo">
-            <h2>Your Paired User</h2>
-            <div id="pairedUserDetails">
-                <p>Loading paired user information...</p>
-            </div>
-        </section>
-    </main>
-
-    <!-- Memory modal -->
-    <div id="memoryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Store your memories</h2>
-            </div>
-            <div class="modal-body">
-                <textarea id="memoryText" class="memory-input" placeholder="Write about this moment..."></textarea>
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn skip-btn" onclick="handleMemorySubmission(true)">Skip</button>
-                <button class="modal-btn submit-btn" onclick="handleMemorySubmission(false)">Submit</button>
-            </div>
-        </div>
+  <main>
+    <div class="scores">
+      <div>Your Score: <span id="userScore">0</span></div>
+      <div>Partner's Score: <span id="partnerScore">0</span></div>
+      <div>Combined Score: <span id="combinedScore">0</span></div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
-        import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
-    
-        const firebaseConfig = {
-            apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
-            authDomain: "ocean-35959.firebaseapp.com",
-            projectId: "ocean-35959",
-            storageBucket: "ocean-35959.firebasestorage.app",
-            messagingSenderId: "926712216319",
-            appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
-            measurementId: "G-J844DFXM0W"
-        };
-    
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-    
-        let currentTaskData = {
-            passed: false,
-            points: 0,
-            task: ''
-        };
-    
-        // Core functions
-        async function updateScores(userId, pairedUserId) {
-            const userRef = ref(db, `users/${userId}`);
-            const pairedUserRef = ref(db, `users/${pairedUserId}`);
-            
-            const [userSnapshot, pairedSnapshot] = await Promise.all([
-                get(userRef),
-                get(pairedUserRef)
-            ]);
-    
-            const userScore = userSnapshot.val().score || 0;
-            const partnerScore = pairedSnapshot.val().score || 0;
-            const combinedScore = userScore + partnerScore;
-    
-            document.getElementById('userScore').textContent = userScore;
-            document.getElementById('partnerScore').textContent = partnerScore;
-            document.getElementById('combinedScore').textContent = combinedScore;
+    <section id="taskSection" class="task-container">
+      <h2>Current Task</h2>
+      <div id="currentTask">
+        <p>Loading task...</p>
+      </div>
+    </section>
+
+    <section id="pairedUserInfo" class="task-container">
+      <h2>Your Paired User</h2>
+      <div id="pairedUserDetails">
+        <p>Loading paired user information...</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="memoryModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Store your memories</h2>
+      </div>
+      <div class="modal-body">
+        <textarea id="memoryText" class="memory-input" placeholder="Write about this moment..."></textarea>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn skip-btn" onclick="handleMemorySubmission(true)">Skip</button>
+        <button class="modal-btn submit-btn" onclick="handleMemorySubmission(false)">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
+    import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
+      authDomain: "ocean-35959.firebaseapp.com",
+      projectId: "ocean-35959",
+      storageBucket: "ocean-35959.appspot.com",
+      messagingSenderId: "926712216319",
+      appId: "1:926712216319:web:ac2a5ffc6fb5b56447eaca",
+      measurementId: "G-J844DFXM0W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let currentTaskData = {
+      passed: false,
+      points: 0,
+      task: ''
+    };
+
+    async function updateScores(userId, pairedUserId) {
+      const userRef = ref(db, `users/${userId}`);
+      const pairedUserRef = ref(db, `users/${pairedUserId}`);
+
+      const [userSnapshot, pairedSnapshot] = await Promise.all([get(userRef), get(pairedUserRef)]);
+
+      const userScore = userSnapshot.val().score || 0;
+      const partnerScore = pairedSnapshot.val().score || 0;
+      const combinedScore = userScore + partnerScore;
+
+      document.getElementById('userScore').textContent = userScore;
+      document.getElementById('partnerScore').textContent = partnerScore;
+      document.getElementById('combinedScore').textContent = combinedScore;
+    }
+
+    async function displayPairedUserInfo(pairedUserId) {
+      const pairedUserRef = ref(db, `users/${pairedUserId}`);
+      try {
+        const snapshot = await get(pairedUserRef);
+        const pairedUserData = snapshot.val();
+
+        if (pairedUserData) {
+          document.getElementById("pairedUserDetails").innerHTML = `
+            <p><strong>Username:</strong> ${pairedUserData.username || 'Not set'}</p>
+            <p><strong>Score:</strong> ${pairedUserData.score || 0}</p>
+            <p><strong>Status:</strong> ${pairedUserData.online ? 'Online' : 'Offline'}</p>
+          `;
+        } else {
+          document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
         }
-    
-        async function displayPairedUserInfo(pairedUserId) {
-            const pairedUserRef = ref(db, `users/${pairedUserId}`);
-            try {
-                const snapshot = await get(pairedUserRef);
-                const pairedUserData = snapshot.val();
-    
-                if (pairedUserData) {
-                    document.getElementById("pairedUserDetails").innerHTML = `
-                        <p><strong>Username:</strong> ${pairedUserData.username || 'Not set'}</p>
-                        <p><strong>Score:</strong> ${pairedUserData.score || 0}</p>
-                        <p><strong>Status:</strong> ${pairedUserData.online ? 'Online' : 'Offline'}</p>
-                    `;
-                } else {
-                    document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
-                }
-            } catch (error) {
-                console.error("Error fetching paired user info:", error);
-                document.getElementById("pairedUserDetails").innerHTML = "<p>Error loading paired user information.</p>";
-            }
+      } catch (error) {
+        console.error("Error fetching paired user info:", error);
+        document.getElementById("pairedUserDetails").innerHTML = "<p>Error loading paired user information.</p>";
+      }
+    }
+
+    async function getRandomTask() {
+      const tasksRef = ref(db, 'tasks');
+      const tasksSnapshot = await get(tasksRef);
+      const tasks = tasksSnapshot.val();
+
+      const lists = Object.keys(tasks);
+      const randomList = lists[Math.floor(Math.random() * lists.length)];
+      const taskList = tasks[randomList];
+      const randomTask = taskList[Math.floor(Math.random() * taskList.length)];
+
+      const points = parseInt(randomList.match(/\d+/)[0]) || 2;
+      return {
+        task: randomTask,
+        points: points,
+        listType: randomList
+      };
+    }
+
+    async function displayNewTask() {
+      try {
+        const taskData = await getRandomTask();
+        const taskDiv = document.getElementById("currentTask");
+        currentTaskData = taskData;
+        taskDiv.innerHTML = `
+          <p>${taskData.task}</p>
+          <p>Worth ${taskData.points} points</p>
+          <div>
+            <button class="pass-btn" onclick="handleTaskCompletion(true)">Pass</button>
+            <button class="fail-btn" onclick="handleTaskCompletion(false)">Fail</button>
+          </div>
+        `;
+      } catch (error) {
+        console.error("Error displaying task:", error);
+        document.getElementById("currentTask").innerHTML = "<p>Error loading task. Please try again.</p>";
+      }
+    }
+
+    window.handleTaskCompletion = async function(passed) {
+      currentTaskData.passed = passed;
+      document.getElementById('memoryModal').style.display = 'block';
+    }
+
+    window.handleMemorySubmission = async function(skip) {
+      const modal = document.getElementById('memoryModal');
+      const user = auth.currentUser;
+      if (!user || !currentTaskData) return;
+
+      try {
+        if (!skip) {
+          const memoryText = document.getElementById('memoryText').value;
+          const memoryRef = push(ref(db, `memories/${user.uid}`));
+          const memoryData = {
+            timestamp: Date.now(),
+            taskResult: currentTaskData.passed,
+            points: currentTaskData.points || 0,
+            task: currentTaskData.task || '',
+            text: memoryText || ''
+          };
+          await set(memoryRef, memoryData);
         }
-    
-        async function getRandomTask() {
-            const tasksRef = ref(db, 'tasks');
-            const tasksSnapshot = await get(tasksRef);
-            const tasks = tasksSnapshot.val();
-    
-            const lists = Object.keys(tasks);
-            const randomList = lists[Math.floor(Math.random() * lists.length)];
-            const taskList = tasks[randomList];
-            const randomTask = taskList[Math.floor(Math.random() * taskList.length)];
-            
-            // Extract points value from list name, now correctly handling two-digit numbers
-            const points = parseInt(randomList.match(/\d+/)[0]) || 2; // Gets the number from the list name
-            
-            console.log('Selected list:', randomList, 'Points:', points); // Debugging log
-            
-            return {
-                task: randomTask,
-                points: points,
-                listType: randomList
-            };
-        }
-    
-        async function displayNewTask() {
-            try {
-                const taskData = await getRandomTask();
-                const taskDiv = document.getElementById("currentTask");
-                currentTaskData = taskData;
-                taskDiv.innerHTML = `
-                    <p>${taskData.task}</p>
-                    <p>Worth ${taskData.points} points</p>
-                    <div>
-                        <button class="pass-btn" onclick="handleTaskCompletion(true)">Pass</button>
-                        <button class="fail-btn" onclick="handleTaskCompletion(false)">Fail</button>
-                    </div>
-                `;
-            } catch (error) {
-                console.error("Error displaying task:", error);
-                document.getElementById("currentTask").innerHTML = "<p>Error loading task. Please try again.</p>";
-            }
+
+        if (currentTaskData.passed) {
+          const userRef = ref(db, `users/${user.uid}`);
+          const userSnapshot = await get(userRef);
+          const userData = userSnapshot.val();
+          const currentScore = userData.score || 0;
+          await update(userRef, {
+            score: currentScore + (currentTaskData.points || 0)
+          });
+
+          if (userData.pairedWith) {
+            await updateScores(user.uid, userData.pairedWith);
+          }
         }
 
-        window.handleTaskCompletion = async function(passed) {
-            currentTaskData.passed = passed;
-            document.getElementById('memoryModal').style.display = 'block';
-        }
+        document.getElementById('memoryText').value = '';
+        modal.style.display = 'none';
+        await displayNewTask();
 
-        window.handleMemorySubmission = async function(skip) {
-            const modal = document.getElementById('memoryModal');
-            const user = auth.currentUser;
-            
-            if (!user || !currentTaskData) return;
+      } catch (error) {
+        console.error("Error handling memory submission:", error);
+        alert("Error saving memory. Please try again.");
+      }
+    }
 
-            try {
-                // Store memory if not skipped
-                if (!skip) {
-                    const memoryText = document.getElementById('memoryText').value;
-                    const memoryRef = push(ref(db, `memories/${user.uid}`));
-                    const memoryData = {
-                        timestamp: Date.now(),
-                        taskResult: currentTaskData.passed,
-                        points: currentTaskData.points || 0,
-                        task: currentTaskData.task || '',
-                        text: memoryText || ''
-                    };
+    window.onclick = function(event) {
+      const modal = document.getElementById('memoryModal');
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
 
-                    await set(memoryRef, memoryData);
-                }
-
-                // Update score if passed
-                if (currentTaskData.passed) {
-                    const userRef = ref(db, `users/${user.uid}`);
-                    const userSnapshot = await get(userRef);
-                    const userData = userSnapshot.val();
-                    const currentScore = userData.score || 0;
-                    
-                    await update(userRef, {
-                        score: currentScore + (currentTaskData.points || 0)
-                    });
-
-                    if (userData.pairedWith) {
-                        await updateScores(user.uid, userData.pairedWith);
-                    }
-                }
-
-                // Reset form and hide modal
-                document.getElementById('memoryText').value = '';
-                modal.style.display = 'none';
-
-                // Display new task
-                await displayNewTask();
-
-            } catch (error) {
-                console.error("Error handling memory submission:", error);
-                alert("Error saving memory. Please try again.");
-            }
-        }
-    
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('memoryModal');
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        }
-    
-        // Initialize the page
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = ref(db, `users/${user.uid}`);
-                try {
-                    const userSnapshot = await get(userRef);
-                    const userData = userSnapshot.val();
-    
-                    if (userData) {
-                        if (userData.pairedWith) {
-                            await updateScores(user.uid, userData.pairedWith);
-                            await displayPairedUserInfo(userData.pairedWith);
-                        } else {
-                            document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
-                        }
-                    }
-                    await displayNewTask();
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                    document.getElementById("currentTask").innerHTML = "<p>Error loading data. Please try again later.</p>";
-                }
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = ref(db, `users/${user.uid}`);
+        try {
+          const userSnapshot = await get(userRef);
+          const userData = userSnapshot.val();
+          if (userData) {
+            if (userData.pairedWith) {
+              await updateScores(user.uid, userData.pairedWith);
+              await displayPairedUserInfo(userData.pairedWith);
             } else {
-                document.getElementById("currentTask").innerHTML = "<p>Please log in to view tasks.</p>";
-                document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
+              document.getElementById("pairedUserDetails").innerHTML = "<p>No paired user found.</p>";
             }
-        });
-    </script>
-    
-    </body>
+          }
+          await displayNewTask();
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          document.getElementById("currentTask").innerHTML = "<p>Error loading data. Please try again later.</p>";
+        }
+      } else {
+        document.getElementById("currentTask").innerHTML = "<p>Please log in to view tasks.</p>";
+        document.getElementById("pairedUserDetails").innerHTML = "<p>Please log in to view your paired user.</p>";
+      }
+    });
+  </script>
+</body>
 </html>
