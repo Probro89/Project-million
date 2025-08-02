@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Signup</title>
+  <title>Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #ffd6e8 0%, #fff0f5 100%);
+      background: linear-gradient(135deg, #fff0f5 0%, #ffd6e8 100%);
       font-family: 'Quicksand', sans-serif;
       color: #444;
       display: flex;
@@ -16,21 +16,23 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
+      position: relative;
+      overflow: hidden;
     }
 
     h1 {
       font-family: 'Pacifico', cursive;
       font-size: 2.8em;
-      color: #d63384;
+      color: #a64ac9;
       margin-bottom: 10px;
     }
 
     form, .google-btn {
       background-color: #fff;
-      border: 2px dashed #ffa6c1;
-      padding: 20px 30px;
+      border: 2px solid #f3b3d4;
+      padding: 22px 30px;
       border-radius: 20px;
-      box-shadow: 0 8px 16px rgba(255, 182, 193, 0.2);
+      box-shadow: 0 10px 18px rgba(255, 192, 203, 0.3);
       margin: 15px 0;
       width: 300px;
       text-align: left;
@@ -40,20 +42,20 @@
       display: block;
       margin-top: 15px;
       font-weight: 600;
-      color: #d63384;
+      color: #a64ac9;
     }
 
     input {
       width: 100%;
       padding: 8px;
-      border: 1px solid #ffd6e8;
+      border: 1px solid #f9c9dc;
       border-radius: 10px;
       margin-top: 5px;
       box-sizing: border-box;
     }
 
     button[type="submit"] {
-      background-color: #ff6fa4;
+      background-color: #b76eb8;
       color: white;
       padding: 10px;
       margin-top: 20px;
@@ -62,15 +64,21 @@
       cursor: pointer;
       font-weight: bold;
       width: 100%;
+      transition: background-color 0.3s ease;
     }
 
     button[type="submit"]:hover {
-      background-color: #ff4c91;
+      background-color: #a14bb3;
     }
 
     .google-btn {
       justify-content: center;
-      border: 2px dashed #f9c5d1;
+      border: 2px solid #f7bdd1;
+      transition: background-color 0.3s ease;
+    }
+
+    .google-btn:hover {
+      background-color: #fdf2f7;
     }
 
     .google-btn img {
@@ -78,17 +86,13 @@
       margin-right: 10px;
     }
 
-    .google-btn:hover {
-      background-color: #ffe9f0;
-    }
-
     p {
       font-size: 0.95em;
-      color: #b30059;
+      color: #94428c;
     }
 
     a {
-      color: #d63384;
+      color: #a64ac9;
       text-decoration: none;
       font-weight: bold;
     }
@@ -97,21 +101,40 @@
       text-decoration: underline;
     }
 
-    /* Optional decorative heart */
-    body::before {
+    /* Soft floating heart background */
+    body::before, body::after {
       content: "💕";
       font-size: 60px;
       position: absolute;
-      top: 20px;
-      left: 20px;
+      opacity: 0.05;
+      animation: float 20s infinite alternate;
+    }
+
+    body::before {
+      top: 10%;
+      left: 10%;
+    }
+
+    body::after {
+      bottom: 10%;
+      right: 10%;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+      100% {
+        transform: translateY(20px);
+      }
     }
   </style>
 
-  <!-- JS (unchanged) -->
+  <!-- Firebase Logic (unchanged) -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
-    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
+    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js';
+    import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyDuwbFf4v05VzuNu84YCS9S31pV9cOYktw",
@@ -128,11 +151,10 @@
     const db = getDatabase(app);
     const googleProvider = new GoogleAuthProvider();
 
-    document.getElementById('googleSignup').addEventListener('click', async () => {
+    document.getElementById('googleLogin').addEventListener('click', async () => {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
-
         const userRef = ref(db, 'users/' + user.uid);
         const snapshot = await get(userRef);
 
@@ -145,64 +167,63 @@
           });
         }
 
+        localStorage.setItem('username', snapshot.exists() ? snapshot.val().username : (user.displayName || user.email.split('@')[0]));
         window.location.href = "user_pairing/pairing.html";
       } catch (error) {
-        console.error("Error with Google signup:", error.message);
+        console.error("Error with Google login:", error.message);
         alert(error.message);
       }
     });
 
-    document.getElementById('signupForm').addEventListener('submit', async (event) => {
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
       event.preventDefault();
 
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const username = document.getElementById("username").value;
 
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
         const userRef = ref(db, 'users/' + user.uid);
-        await set(userRef, {
-          username: username,
-          email: user.email,
-          pairingRequests: [],
-          pairedWith: null
-        });
+        const userSnapshot = await get(userRef);
 
-        window.location.href = "user_pairing/pairing.html";
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+          localStorage.setItem('username', userData.username);
+          window.location.href = "user_pairing/pairing.html";
+        } else {
+          console.log("No user data found.");
+          alert("No user data found.");
+        }
       } catch (error) {
-        console.error("Error signing up:", error.message);
+        console.error("Error logging in:", error.message);
         alert(error.message);
       }
     });
   </script>
 </head>
 <body>
-  <h1>Signup</h1>
+  <h1>Login</h1>
 
-  <!-- Google Sign up button -->
-  <button id="googleSignup" class="google-btn">
+  <!-- Google Login button -->
+  <button id="googleLogin" class="google-btn">
     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo">
-    Sign up with Google
+    Login with Google
   </button>
 
-  <p>Or sign up with email:</p>
+  <p>Or login with email:</p>
 
-  <form id="signupForm">
-    <label for="username">Username:</label>
-    <input type="text" id="username" required>
-    <br>
+  <form id="loginForm">
     <label for="email">Email:</label>
     <input type="email" id="email" required>
     <br>
     <label for="password">Password:</label>
     <input type="password" id="password" required>
     <br>
-    <button type="submit">Signup</button>
+    <button type="submit">Login</button>
   </form>
 
-  <p>Already have an account? <a href="login.html">Login here</a></p>
+  <p>Don't have an account? <a href="index.html">Signup here</a></p>
 </body>
 </html>
