@@ -168,7 +168,7 @@
         }
 
         localStorage.setItem('username', snapshot.exists() ? snapshot.val().username : (user.displayName || user.email.split('@')[0]));
-        window.location.href = "user_pairing/pairing.html";
+        window.location.href = "pairing.html";
       } catch (error) {
         console.error("Error with Google login:", error.message);
         alert(error.message);
@@ -191,7 +191,7 @@
         if (userSnapshot.exists()) {
           const userData = userSnapshot.val();
           localStorage.setItem('username', userData.username);
-          window.location.href = "user_pairing/pairing.html";
+          window.location.href = "pairing.html";
         } else {
           console.log("No user data found.");
           alert("No user data found.");
